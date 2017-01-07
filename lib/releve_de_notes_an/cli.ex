@@ -67,9 +67,13 @@ defmodule ReleveDeNotesAN.CLI do
 
   defp process(:last_12_months) do
     Logger.debug "Show last 12 months"
+
+    ReleveDeNotesAN.ANData.fetch()
   end
 
   defp process([year: year, month: month]) do
     Logger.debug "Show month #{month} of year #{year}"
+
+    ReleveDeNotesAN.ANData.fetch(year, month)
   end
 end
