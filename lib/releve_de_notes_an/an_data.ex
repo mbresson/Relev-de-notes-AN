@@ -9,7 +9,7 @@ defmodule ReleveDeNotesAN.ANData do
   require Logger
 
   @api_url Application.get_env(:releve_de_notes_an, :api_url)
-  @http_options [ follow_redirect: true, max_redirect: 10 ]
+  @http_options [follow_redirect: true, max_redirect: 10]
 
   @doc """
   Fetch data for the specified year and month.
@@ -118,7 +118,7 @@ defmodule ReleveDeNotesAN.ANData do
     #  ... other deputes
     # </deputes>
     
-    import SweetXml, only: [ sigil_x: 2 ]
+    import SweetXml, only: [sigil_x: 2]
     
     data |> SweetXml.xpath(
       ~x"//deputes/depute"l,
@@ -137,5 +137,18 @@ defmodule ReleveDeNotesAN.ANData do
       questions_orales: ~x"./questions_orales/text()"I
     )
   end
-  
+
+  def sort(data, sort_by, _sort_asc = true) do
+
+    mapper = &(&1[sort_by])
+    
+    Enum.sort_by(data, mapper)
+  end
+
+  def sort(data, sort_by, _sort_asc = false) do
+
+    mapper = &(&1[sort_by])
+
+    Enum.sort_by(data, mapper, &(>=/2))
+  end
 end

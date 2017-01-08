@@ -11,12 +11,41 @@ defmodule CLITest do
     assert parse_args(["-h", "trailing argument", "another useless argument"]) === :help
   end
 
-  test "if passed nothing, return :last_12_months" do
-    assert parse_args([]) === :last_12_months
+  test "if passed nothing, return default sort options" do
+    assert parse_args([]) === %{sort_by: "nom", sort_asc: false}
   end
 
-  test "if passed a year Y and a month M, return [year: Y, month: M]" do
-    assert parse_args(["2012", "12"]) === [year: 2012, month: 12]
-    assert parse_args(["2012", "02"]) === [year: 2012, month: 2]
+  test "if passed sort parameters, return the corresponding arguments" do
+
+    with parameters = ["--sort-by", "rapports"] do
+      assert parse_args(parameters) === %{sort_by: "rapports", sort_asc: false}
+    end
+
+    with parameters = ["--sort-by", "rapports", "--sort-asc"] do
+      assert parse_args(parameters) === %{sort_by: "rapports", sort_asc: true}
+    end
+    
+    with parameters = ["--sort-asc", "--sort-by", "rapports"] do
+      assert parse_args(parameters) === %{sort_by: "rapports", sort_asc: true}
+    end
+    
+    with parameters = ["--sort-asc"] do
+      assert parse_args(parameters) === %{sort_by: "nom", sort_asc: true}
+    end
+  end
+
+  test "if passed a year Y and a month M, return the corresponding arguments" do
+
+    with parameters = ["2012", "12"] do
+      assert parse_args(parameters) === %{year: 2012, month: 12, sort_by: "nom", sort_asc: false}
+    end
+
+    with parameters = ["2012", "12", "--sort-by", "rapports"] do
+      assert parse_args(parameters) === %{year: 2012, month: 12, sort_by: "rapports", sort_asc: false}
+    end
+    
+    with parameters = ["2012", "12", "--sort-asc"] do
+      assert parse_args(parameters) === %{year: 2012, month: 12, sort_by: "nom", sort_asc: true}
+    end
   end
 end
