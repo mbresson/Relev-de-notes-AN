@@ -65,8 +65,7 @@ defmodule ReleveDeNotesAN.ANData do
 
     case {"Status", "404 Not Found"} in headers do
       false ->
-	Logger.debug "Received 200 with data ="
-	Logger.debug body
+	Logger.debug "Received 200"
 	
 	extract(body)
       true ->
@@ -79,8 +78,10 @@ defmodule ReleveDeNotesAN.ANData do
   defp parse({:ok, %{status_code: 404}}) do
 
     Logger.debug "Received 404"
-    
-    {:error, "No data found"}
+
+    IO.puts "There is no data for this date"
+
+    System.halt(0)
   end
 
   defp parse({:error, reason}) do
@@ -138,17 +139,132 @@ defmodule ReleveDeNotesAN.ANData do
     )
   end
 
-  def sort(data, sort_by, _sort_asc = true) do
+  defp sort_by_to_atom("nom"), do: :nom
+  defp sort_by_to_atom("semaines_presence"), do: :semaines_presence
+  defp sort_by_to_atom("commission_presences"), do: :commission_presences
+  defp sort_by_to_atom("commission_interventions"), do: :commission_interventions
+  defp sort_by_to_atom("hemicycle_interventions"), do: :hemicycle_interventions
+  defp sort_by_to_atom("hemicycle_interventions_courtes"), do: :hemicycle_interventions_courtes
+  defp sort_by_to_atom("amendements_signes"), do: :amendements_signes
+  defp sort_by_to_atom("amendements_adoptes"), do: :amendements_adoptes
+  defp sort_by_to_atom("rapports"), do: :rapports
+  defp sort_by_to_atom("propositions_ecrites"), do: :propositions_ecrites
+  defp sort_by_to_atom("propositions_signees"), do: :propositions_signees
+  defp sort_by_to_atom("questions_ecrites"), do: :questions_ecrites
+  defp sort_by_to_atom("questions_orales"), do: :questions_orales
 
-    mapper = &(&1[sort_by])
+  def sort(data, sort_by, _sort_asc = true) do
     
-    Enum.sort_by(data, mapper)
+    Logger.debug "Sort by #{sort_by}, ascending order"
+
+    with sort_by = sort_by_to_atom(sort_by) do
+      mapper = &(&1[sort_by])    
+      Enum.sort_by(data, mapper)
+    end
   end
 
   def sort(data, sort_by, _sort_asc = false) do
+    
+    Logger.debug "Sort by #{sort_by}, descending order"
+    
+    with sort_by = sort_by_to_atom(sort_by) do
+      mapper = &(&1[sort_by])    
+      Enum.sort_by(data, mapper, &(>=/2))
+    end
+  end
 
-    mapper = &(&1[sort_by])
+  def display(data) do
 
-    Enum.sort_by(data, mapper, &(>=/2))
+    columns = [
+      nom: "Nom",
+      semaines_presence: "SA",
+      commission_presences: "CS",
+      commission_interventions: "CI",
+      hemicycle_interventions: "HIL",
+      hemicycle_interventions_courtes: "HIC",
+      amendements_signes: "AS",
+      amendements_adoptes: "AA",
+      rapports: "RE",
+      propositions_ecrites: "PE",
+      propositions_signees: "PS",
+      questions_ecrites: "QE",
+      questions_orales: "QO"
+    ]
+
+    columns_width = columns
+    |> Enum.map(fn({key, title}) -> {key, column_max_width(data, key, title)} end)
+
+    line_width = Enum.sum(Keyword.values(columns_width)) + length(columns_width)*4
+
+    IO.puts String.duplicate("#", line_width)
+    
+    header = columns
+    |> Enum.map(fn({key, title}) -> "# " <> pad_value(title, columns_width[key]) <> " #" end)
+
+    IO.puts header
+
+    data
+    |> Enum.map(fn(row) -> Enum.map(columns_width, fn({key, width}) -> "# " <> pad_value(row[key], width) <> " #" end) end)
+    |> Enum.map(&IO.puts(&1))
+    
+    IO.puts String.duplicate("#", line_width)
+  end    
+
+  defp column_max_width(data, column_key, column_name) do
+
+    # gives the maximum width a column must have
+    # for its longest value to fit in it when printed to the screen
+    # if the column's name is wider, its width is the maximum
+
+    # example use 1:
+    # data = [
+    #   %{a: "Bonjour", b: "Adieu"}
+    #   %{a: "Coucou", b: "Salut"}
+    #   %{a: "Hi", b: "Bye"}
+    #
+    # column_key = :a
+    # column_name = "hello"
+    #
+    # => 7, because 7 is the length of the longest value ("Bonjour")
+    # works the same way with integers, floats or any type that can be printed
+    #
+    # example use 2:
+    # data = [
+    #   %{a: "Bonjour", b: "Adieu"}
+    #   %{a: "Coucou", b: "Salut"}
+    #   %{a: "Hi", b: "Bye"}
+    #
+    # column_key = :a
+    # column_name = "Greetings"
+    #
+    # => 9, because 9 is the length of the column's name ("Greetings")
+    #       which is longer than all values
+
+    max_value_width = data
+    |> Enum.map(fn(row) -> row[column_key] end)
+    |> Enum.map(fn(value) -> String.length("#{value}") end)
+    |> Enum.max()
+
+    max(max_value_width, String.length(column_name))
+  end
+
+  defp pad_value(value, max_width, pad \\ " ") do
+
+    # add the correct number of `pad` before and after `value`
+    # for it to be centered and have the same width as max_width
+    #
+    # examples use:
+    # value = 573, max_width = 5, pad = " " => " 573 "
+    # value = "Hi", max_width = 5, pad = "?" => "?Hi??"
+    
+    value_string = "#{value}"
+
+    total_pad = max_width - String.length(value_string)
+    left_pad = div total_pad, 2
+    right_pad = total_pad - left_pad
+
+    String.duplicate(pad, left_pad) <>
+      value_string <>
+      String.duplicate(pad, right_pad)
   end
 end

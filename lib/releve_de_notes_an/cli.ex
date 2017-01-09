@@ -86,7 +86,7 @@ defmodule ReleveDeNotesAN.CLI do
 
     ANData.fetch(year, month)
     |> ANData.sort(sort_by, sort_asc)
-    |> IO.inspect
+    |> ANData.display
   end
 
   defp process(%{sort_by: sort_by, sort_asc: sort_asc}) do
@@ -97,7 +97,7 @@ defmodule ReleveDeNotesAN.CLI do
 
     ANData.fetch()
     |> ANData.sort(sort_by, sort_asc)
-    |> IO.inspect
+    |> ANData.display
   end
 
   defp process(:help) do
@@ -108,55 +108,56 @@ defmodule ReleveDeNotesAN.CLI do
      * --sort-by must be followed by the name of one of the columns of data available, e.g. "semaines_presence" for Semaines d'activité (see below).
 
     Sens de chaque colonne / meaning of the columns:
-    (warning: English explanations may be incomplete or incorrect, check the French version for the best accuracy)
+    (pour indiquer quelle colonne utiliser pour trier les députés, utiliser son nom comme indiqué parenthèses)
+    (to specify which column to use to sort the députés, use its name as shown between parentheses)
 
      * Nom (nom) = nom complet du député / député's full name
 
-     * Semaines d'activité (semaines_presence) =
+     * SA / Semaines d'activité (semaines_presence) =
          Nombre de semaines où le député a été relevé présent en commission ou a pris la parole (même brièvement) en hémicycle.
          Number of weeks during which the député has attended a parliamentary committee session or has spoken (even shortly) in a plenary session.
 
-     * Commission séances (commission_presences) =
+     * CS / Commission séances (commission_presences) =
          Nombre de séances de commission où le député a été relevé présent.
          Number of parliamentary committee sessions attended by the député.
 
-     * Commission interventions (commission_interventions) =
+     * CI / Commission interventions (commission_interventions) =
          Nombre d'interventions prononcées par le député en commissions.
          Number of times the député has intervened during parliamentary committee sessions.
 
-     * Hémicycle interventions longues (hemicycle_interventions) =
+     * HIL / Hémicycle interventions longues (hemicycle_interventions) =
          Nombre d'interventions de plus de 20 mots prononcées par le député en hémicycle.
          Number of times the député has intervened during plenary sessions (spoke more than 20 words).
 
-     * Hémicycle interventions courtes (hemicycle_interventions_courtes) =
+     * HIC / Hémicycle interventions courtes (hemicycle_interventions_courtes) =
          Nombre d'interventions de 20 mots et moins prononcées par le député en hémicycle.
          Number of times the député has intervened during plenary sessions (spoke 20 words or less).
 
-     * Amendements signés (amendements_signes) =
+     * AS / Amendements signés (amendements_signes) =
          Nombre d'amendements signés ou co-signés par le député.
          Number of amendments signed or co-signed by the député.
 
-     * Amendements adoptés (amendements_adoptes) =
+     * AA / Amendements adoptés (amendements_adoptes) =
          Nombre d'amendements adoptés qui ont été signés ou cosignés par le député.
          Number of amendments passed that have been signed or co-signed by the député.
 
-     * Rapports écrits (rapports) =
+     * RE / Rapports écrits (rapports) =
          Nombre de rapports ou avis dont le député est l'auteur.
          Number of notices or reports made by the député.
 
-     * Propositions écrites (propositions_ecrites) =
+     * PE / Propositions écrites (propositions_ecrites) =
          Nombre de propositions de loi ou de résolution dont le député est l'auteur.
          Number of bills or resolutions originating from the député.
 
-     * Propositions signées (propositions_signees) =
+     * PS / Propositions signées (propositions_signees) =
          Nombre de propositions de loi ou de résolution dont le député est cosignataire.
          Number of bills or resolutions co-signed by the député.
 
-     * Questions écrites (questions_ecrites) =
+     * QE / Questions écrites (questions_ecrites) =
          Nombre de questions au gouvernement écrites soumises par le député.
          Number of writen questions to the government submitted by the député.
 
-     * Questions orales (questions_orales) =
+     * QO / Questions orales (questions_orales) =
          Nombre de questions au gouvernement orales posées par le député.
          Number of oral questions addressed to the government by the député.
 
